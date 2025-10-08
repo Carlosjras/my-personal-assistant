@@ -4,7 +4,7 @@ import sqlite3
 import datetime
 import sys
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # ================= TOKEN VERIFICATION =================
 print("🔍 Starting environment check...")
@@ -205,9 +205,9 @@ class PersonalAssistant:
 # Initialize assistant
 assistant = PersonalAssistant()
 
-def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command"""
-    user = update.message.from_user
+    user = update.effective_user
     message = f"""
 👋 Hello {user.first_name}! 
 
@@ -227,11 +227,11 @@ I'm your personal assistant! 🤖
 
 Try now! ✨
     """
-    update.message.reply_text(message, parse_mode='Markdown')
+    await update.message.reply_text(message, parse_mode='Markdown')
 
-def handle_message(update: Update, context: CallbackContext):
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Process messages"""
-    user_id = update.message.from_user.id
+    user_id = update.effective_user.id
     text = update.message.text
     
     try:
@@ -291,38 +291,43 @@ def handle_message(update: Update, context: CallbackContext):
 `My shopping list`
             """
         
-        update.message.reply_text(response, parse_mode='Markdown')
+        await update.message.reply_text(response, parse_mode='Markdown')
         
     except Exception as e:
         print(f"Error: {e}")
-        update.message.reply_text("❌ Temporary error. Try again.")
+        await update.message.reply_text("❌ Temporary error. Try again.")
+
+def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle errors"""
+    print(f"Update {update} caused error {context.error}")
 
 def main():
     """Main function"""
     print("🚀 Starting Personal Assistant...")
     
     try:
-        # Create Updater with token
-        updater = Updater(TOKEN, use_context=True)
-        
-        # Get dispatcher to register handlers
-        dp = updater.dispatcher
+        # Create Application
+        application = Application.builder().token(TOKEN).build()
         
         # Add handlers
-        dp.add_handler(CommandHandler("start", start))
-        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        
+        # Add error handler
+        application.add_error_handler(error_handler)
         
         # Start the Bot
-        updater.start_polling()
+        print("✅ Bot starting polling...")
+        application.run_polling()
         
         print("✅ Bot started successfully!")
         print("🤖 Waiting for messages...")
         
-        # Run the bot until you press Ctrl-C
-        updater.idle()
-        
     except Exception as e:
         print(f"❌ Error starting bot: {e}")
+        # More detailed error information
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
