@@ -4,7 +4,7 @@ import sqlite3
 import datetime
 import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # ================= TOKEN VERIFICATION =================
 print("🔍 Starting environment check...")
@@ -15,7 +15,10 @@ TOKEN = os.getenv("BOT_TOKEN")
 print("📋 Available environment variables:")
 for key, value in os.environ.items():
     if 'BOT' in key or 'TOKEN' in key or 'TELEGRAM' in key:
-        print(f"   {key}: {value}")
+        if key == 'BOT_TOKEN':
+            print(f"   {key}: {value[:10]}...")  # Show only first 10 chars for security
+        else:
+            print(f"   {key}: {value}")
 
 # Final verification
 if not TOKEN:
@@ -97,7 +100,9 @@ class PersonalAssistant:
             times = {
                 '8h': '08:00', '9h': '09:00', '10h': '10:00', '11h': '11:00',
                 '12h': '12:00', '13h': '13:00', '14h': '14:00', '15h': '15:00', 
-                '16h': '16:00', '17h': '17:00', '18h': '18:00', '19h': '19:00'
+                '16h': '16:00', '17h': '17:00', '18h': '18:00', '19h': '19:00',
+                '8:00': '08:00', '9:00': '09:00', '10:00': '10:00', '11:00': '11:00',
+                '14:00': '14:00', '15:00': '15:00', '16:00': '16:00', '17:00': '17:00'
             }
             
             for time_text, time_value in times.items():
@@ -140,7 +145,7 @@ class PersonalAssistant:
                 'leite', 'pão', 'arroz', 'feijão', 'café', 'açúcar', 'óleo',
                 'carne', 'frango', 'peixe', 'ovos', 'queijo', 'manteiga',
                 'alface', 'tomate', 'cebola', 'batata', 'cenoura', 'frutas',
-                'milk', 'bread', 'rice', 'eggs', 'cheese', 'fruits'
+                'milk', 'bread', 'rice', 'eggs', 'cheese', 'fruits', 'vegetables'
             }
             
             for product in products:
@@ -200,9 +205,9 @@ class PersonalAssistant:
 # Initialize assistant
 assistant = PersonalAssistant()
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: CallbackContext):
     """Handle /start command"""
-    user = update.effective_user
+    user = update.message.from_user
     message = f"""
 👋 Hello {user.first_name}! 
 
@@ -222,11 +227,11 @@ I'm your personal assistant! 🤖
 
 Try now! ✨
     """
-    await update.message.reply_text(message, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def handle_message(update: Update, context: CallbackContext):
     """Process messages"""
-    user_id = update.effective_user.id
+    user_id = update.message.from_user.id
     text = update.message.text
     
     try:
@@ -286,26 +291,35 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 `My shopping list`
             """
         
-        await update.message.reply_text(response, parse_mode='Markdown')
+        update.message.reply_text(response, parse_mode='Markdown')
         
     except Exception as e:
         print(f"Error: {e}")
-        await update.message.reply_text("❌ Temporary error. Try again.")
+        update.message.reply_text("❌ Temporary error. Try again.")
 
 def main():
     """Main function"""
     print("🚀 Starting Personal Assistant...")
     
     try:
-        app = Application.builder().token(TOKEN).build()
+        # Create Updater with token
+        updater = Updater(TOKEN, use_context=True)
         
-        app.add_handler(CommandHandler("start", start))
-        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        # Get dispatcher to register handlers
+        dp = updater.dispatcher
+        
+        # Add handlers
+        dp.add_handler(CommandHandler("start", start))
+        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+        
+        # Start the Bot
+        updater.start_polling()
         
         print("✅ Bot started successfully!")
         print("🤖 Waiting for messages...")
         
-        app.run_polling()
+        # Run the bot until you press Ctrl-C
+        updater.idle()
         
     except Exception as e:
         print(f"❌ Error starting bot: {e}")
