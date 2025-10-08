@@ -3,56 +3,39 @@ import logging
 import sqlite3
 import datetime
 import sys
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# ================= TOKEN VERIFICATION =================
-print("🔍 Starting environment check...")
+# ================= VERIFICAÇÃO DO AMBIENTE =================
+print("🔍 Verificando ambiente...")
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Debug: Show available environment variables
-print("📋 Available environment variables:")
+# Debug
+print("📋 Variáveis de ambiente:")
 for key, value in os.environ.items():
-    if 'BOT' in key or 'TOKEN' in key or 'TELEGRAM' in key:
-        if key == 'BOT_TOKEN':
-            print(f"   {key}: {value[:10]}...")
-        else:
-            print(f"   {key}: {value}")
+    if 'BOT' in key or 'TOKEN' in key:
+        print(f"   {key}: {value[:10]}...")
 
-# Final verification
 if not TOKEN:
-    print("❌ CRITICAL ERROR: BOT_TOKEN not found!")
-    print("\n💡 RENDER SOLUTION:")
-    print("1. Go to 'Environment'")
-    print("2. Click 'Add Environment Variable'")
-    print("3. Key: BOT_TOKEN")
-    print("4. Value: YOUR_BOTFATHER_TOKEN")
-    print("5. Click 'Save Changes'")
-    print("6. Redeploy")
+    print("❌ ERRO: BOT_TOKEN não encontrado!")
     sys.exit(1)
 
-print(f"✅ Token loaded! First 5 chars: {TOKEN[:5]}...")
+print(f"✅ Token carregado! Iniciando...")
 
-# ================= CONFIGURATION =================
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+# ================= CONFIGURAÇÃO =================
+logging.basicConfig(level=logging.INFO)
 
-print("🔄 Starting personal assistant system...")
+print("🔄 Iniciando assistente pessoal...")
 
-class PersonalAssistant:
+class AssistentePessoal:
     def __init__(self):
         self.init_db()
     
     def init_db(self):
-        """Initialize database"""
+        """Inicializar banco de dados"""
         try:
             conn = sqlite3.connect('assistente.db')
             cursor = conn.cursor()
             
-            # Appointments table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS compromissos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +47,6 @@ class PersonalAssistant:
                 )
             ''')
             
-            # Shopping list table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS listas_compras (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,85 +59,73 @@ class PersonalAssistant:
             
             conn.commit()
             conn.close()
-            print("✅ Database ready")
+            print("✅ Banco de dados pronto")
             
         except Exception as e:
-            print(f"❌ Database error: {e}")
+            print(f"❌ Erro no banco: {e}")
 
-    def process_appointment(self, user_id, text):
-        """Process and save appointment"""
+    def processar_compromisso(self, user_id, texto):
+        """Processar compromisso"""
         try:
-            date = datetime.datetime.now().strftime('%d/%m/%Y')
-            time = "09:00"
+            data = datetime.datetime.now().strftime('%d/%m/%Y')
+            hora = "09:00"
             
-            # Detect dates
-            if 'amanhã' in text.lower() or 'tomorrow' in text.lower():
-                date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%d/%m/%Y')
-            elif 'segunda' in text.lower() or 'monday' in text.lower():
-                today = datetime.datetime.now()
-                days_to_monday = (0 - today.weekday()) % 7
-                date = (today + datetime.timedelta(days=days_to_monday)).strftime('%d/%m/%Y')
+            if 'amanhã' in texto.lower():
+                data = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%d/%m/%Y')
             
-            # Detect times
-            times = {
+            horarios = {
                 '8h': '08:00', '9h': '09:00', '10h': '10:00', '11h': '11:00',
                 '12h': '12:00', '13h': '13:00', '14h': '14:00', '15h': '15:00', 
-                '16h': '16:00', '17h': '17:00', '18h': '18:00', '19h': '19:00',
-                '8:00': '08:00', '9:00': '09:00', '10:00': '10:00', '11:00': '11:00',
-                '14:00': '14:00', '15:00': '15:00', '16:00': '16:00', '17:00': '17:00'
+                '16h': '16:00', '17h': '17:00', '18h': '18:00', '19h': '19:00'
             }
             
-            for time_text, time_value in times.items():
-                if time_text in text.lower():
-                    time = time_value
+            for h_text, h_valor in horarios.items():
+                if h_text in texto.lower():
+                    hora = h_valor
                     break
             
-            # Define title
-            title = "Appointment"
-            if 'escola' in text.lower() or 'school' in text.lower():
-                title = "Pick up kids from school"
-            elif 'reunião' in text.lower() or 'meeting' in text.lower():
-                title = "Work meeting"
-            elif 'médico' in text.lower() or 'doctor' in text.lower():
-                title = "Medical appointment"
-            elif 'supermercado' in text.lower() or 'market' in text.lower():
-                title = "Grocery shopping"
+            titulo = "Compromisso"
+            if 'escola' in texto.lower():
+                titulo = "Buscar filhos na escola"
+            elif 'reunião' in texto.lower():
+                titulo = "Reunião de trabalho"
+            elif 'médico' in texto.lower():
+                titulo = "Consulta médica"
+            elif 'supermercado' in texto.lower():
+                titulo = "Supermercado"
             
-            # Save to database
             conn = sqlite3.connect('assistente.db')
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO compromissos (user_id, titulo, data, hora) VALUES (?, ?, ?, ?)",
-                (user_id, title, date, time)
+                (user_id, titulo, data, hora)
             )
             conn.commit()
             conn.close()
             
-            return True, title, date, time
+            return True, titulo, data, hora
             
         except Exception as e:
-            print(f"Error processing appointment: {e}")
+            print(f"Erro ao processar compromisso: {e}")
             return False, None, None, None
 
-    def process_shopping_list(self, user_id, text):
-        """Process and save shopping items"""
+    def processar_lista_compras(self, user_id, texto):
+        """Processar lista de compras"""
         try:
-            recognized_items = []
-            products = {
+            itens_reconhecidos = []
+            produtos = {
                 'leite', 'pão', 'arroz', 'feijão', 'café', 'açúcar', 'óleo',
                 'carne', 'frango', 'peixe', 'ovos', 'queijo', 'manteiga',
-                'alface', 'tomate', 'cebola', 'batata', 'cenoura', 'frutas',
-                'milk', 'bread', 'rice', 'eggs', 'cheese', 'fruits', 'vegetables'
+                'alface', 'tomate', 'cebola', 'batata', 'cenoura', 'frutas'
             }
             
-            for product in products:
-                if product in text.lower():
-                    recognized_items.append(product)
+            for produto in produtos:
+                if produto in texto.lower():
+                    itens_reconhecidos.append(produto)
             
-            # Save to database
             conn = sqlite3.connect('assistente.db')
             cursor = conn.cursor()
-            for item in recognized_items:
+            for item in itens_reconhecidos:
                 cursor.execute(
                     "INSERT OR IGNORE INTO listas_compras (user_id, item) VALUES (?, ?)",
                     (user_id, item)
@@ -163,31 +133,31 @@ class PersonalAssistant:
             conn.commit()
             conn.close()
             
-            return recognized_items
+            return itens_reconhecidos
             
         except Exception as e:
-            print(f"Error processing list: {e}")
+            print(f"Erro ao processar lista: {e}")
             return []
 
-    def get_today_agenda(self, user_id):
-        """Get today's appointments"""
+    def obter_agenda_hoje(self, user_id):
+        """Obter agenda de hoje"""
         try:
-            today = datetime.datetime.now().strftime('%d/%m/%Y')
+            hoje = datetime.datetime.now().strftime('%d/%m/%Y')
             conn = sqlite3.connect('assistente.db')
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT titulo, hora FROM compromissos WHERE user_id = ? AND data = ? ORDER BY hora",
-                (user_id, today)
+                (user_id, hoje)
             )
-            appointments = cursor.fetchall()
+            compromissos = cursor.fetchall()
             conn.close()
-            return appointments
+            return compromissos
         except Exception as e:
-            print(f"Error getting agenda: {e}")
+            print(f"Erro ao obter agenda: {e}")
             return []
 
-    def get_shopping_list(self, user_id):
-        """Get shopping list"""
+    def obter_lista_compras(self, user_id):
+        """Obter lista de compras"""
         try:
             conn = sqlite3.connect('assistente.db')
             cursor = conn.cursor()
@@ -195,142 +165,114 @@ class PersonalAssistant:
                 "SELECT item FROM listas_compras WHERE user_id = ? AND comprado = FALSE ORDER BY item",
                 (user_id,)
             )
-            items = cursor.fetchall()
+            itens = cursor.fetchall()
             conn.close()
-            return items
+            return itens
         except Exception as e:
-            print(f"Error getting list: {e}")
+            print(f"Erro ao obter lista: {e}")
             return []
 
-# Initialize assistant
-assistant = PersonalAssistant()
+# Inicializar assistente
+assistente = AssistentePessoal()
 
-def start(update: Update, context: CallbackContext):
-    """Handle /start command"""
-    user = update.message.from_user
-    message = f"""
-👋 Hello {user.first_name}! 
+# AGORA importamos o telegram (depois de verificar o token)
+try:
+    from telegram import Update
+    from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+    print("✅ Módulos Telegram carregados com sucesso")
+except ImportError as e:
+    print(f"❌ Erro ao importar módulos Telegram: {e}")
+    sys.exit(1)
 
-I'm your personal assistant! 🤖
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Comando /start"""
+    user = update.effective_user
+    mensagem = f"""
+👋 Olá {user.first_name}! 
 
-📅 **APPOINTMENTS:**
-• `Meeting tomorrow 14h`
-• `Pick up kids school 17h` 
+Sou seu assistente pessoal! 🤖
 
-🛒 **SHOPPING LIST:**
-• `Need milk and bread`
-• `Out of rice and beans`
+📅 **AGENDA:**
+• `Reunião amanhã 14h`
+• `Buscar filhos escola 17h` 
 
-📊 **QUERIES:**
-• `My agenda today`
-• `My shopping list`
+🛒 **LISTA DE COMPRAS:**
+• `Preciso de leite e pão`
+• `Acabou o arroz e feijão`
 
-Try now! ✨
+📊 **CONSULTAS:**
+• `Minha agenda hoje`
+• `Minha lista de compras`
     """
-    update.message.reply_text(message, parse_mode='Markdown')
+    await update.message.reply_text(mensagem, parse_mode='Markdown')
 
-def handle_message(update: Update, context: CallbackContext):
-    """Process messages"""
-    user_id = update.message.from_user.id
-    text = update.message.text
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Processar mensagens"""
+    user_id = update.effective_user.id
+    texto = update.message.text
     
     try:
-        # APPOINTMENTS
-        if any(word in text.lower() for word in ['agenda', 'compromisso', 'reunião', 'marcar', 'appointment', 'meeting']):
-            if 'minha agenda' in text.lower() or 'my agenda' in text.lower():
-                appointments = assistant.get_today_agenda(user_id)
-                if appointments:
-                    response = "📅 **Your agenda today:**\n\n"
-                    for title, time in appointments:
-                        response += f"• {title} - {time}\n"
+        if any(palavra in texto.lower() for palavra in ['agenda', 'compromisso', 'reunião', 'marcar']):
+            if 'minha agenda' in texto.lower():
+                compromissos = assistente.obter_agenda_hoje(user_id)
+                if compromissos:
+                    resposta = "📅 **Sua agenda hoje:**\n\n"
+                    for titulo, hora in compromissos:
+                        resposta += f"• {titulo} - {hora}\n"
                 else:
-                    response = "📅 *No appointments for today!*"
+                    resposta = "📅 *Nenhum compromisso para hoje!*"
             else:
-                success, title, date, time = assistant.process_appointment(user_id, text)
-                if success:
-                    response = f"✅ **Scheduled!**\n\n**{title}**\n🗓️ {date} ⏰ {time}"
+                sucesso, titulo, data, hora = assistente.processar_compromisso(user_id, texto)
+                if sucesso:
+                    resposta = f"✅ **Agendado!**\n\n**{titulo}**\n🗓️ {data} ⏰ {hora}"
                 else:
-                    response = "❌ Error scheduling. Try again."
+                    resposta = "❌ Erro ao agendar."
         
-        # SHOPPING LIST
-        elif any(word in text.lower() for word in ['lista', 'compras', 'comprar', 'leite', 'pão', 'acabou', 'list', 'shopping', 'milk', 'bread']):
-            if 'minha lista' in text.lower() or 'my list' in text.lower():
-                items = assistant.get_shopping_list(user_id)
-                if items:
-                    response = "🛒 **Your shopping list:**\n\n"
-                    for (item,) in items:
-                        response += f"• {item}\n"
+        elif any(palavra in texto.lower() for palavra in ['lista', 'compras', 'comprar', 'leite', 'pão', 'acabou']):
+            if 'minha lista' in texto.lower():
+                itens = assistente.obter_lista_compras(user_id)
+                if itens:
+                    resposta = "🛒 **Sua lista de compras:**\n\n"
+                    for (item,) in itens:
+                        resposta += f"• {item}\n"
                 else:
-                    response = "🛒 *Shopping list empty!*"
+                    resposta = "🛒 *Lista de compras vazia!*"
             else:
-                items = assistant.process_shopping_list(user_id, text)
-                if items:
-                    response = f"🛒 **Added to list:**\n\n" + "\n".join([f"• {item}" for item in items])
+                itens = assistente.processar_lista_compras(user_id, texto)
+                if itens:
+                    resposta = f"🛒 **Adicionado:**\n\n" + "\n".join([f"• {item}" for item in itens])
                 else:
-                    response = "❌ No items identified. Try: 'need milk and bread'"
+                    resposta = "❌ Não identifiquei itens. Tente: 'preciso de leite e pão'"
         
-        # GREETINGS
-        elif any(word in text.lower() for word in ['oi', 'olá', 'hello', 'hi']):
-            response = "👋 Hello! How can I help with your agenda or shopping list?"
+        elif any(palavra in texto.lower() for palavra in ['oi', 'olá']):
+            resposta = "👋 Olá! Como posso ajudar?"
         
-        # HELP
         else:
-            response = """
-🤖 **How can I help?**
-
-📅 **Appointments:**
-`Meeting tomorrow 14h`
-`Pick up kids school 17h`
-
-🛒 **Shopping:**
-`Need milk, bread and eggs`
-`Out of rice and beans`
-
-📊 **Queries:**
-`My agenda today`
-`My shopping list`
-            """
+            resposta = "🤖 Diga: 'reunião amanhã 14h' ou 'preciso de leite'"
         
-        update.message.reply_text(response, parse_mode='Markdown')
+        await update.message.reply_text(resposta, parse_mode='Markdown')
         
     except Exception as e:
-        print(f"Error: {e}")
-        update.message.reply_text("❌ Temporary error. Try again.")
-
-def error_handler(update: Update, context: CallbackContext):
-    """Handle errors"""
-    print(f"Update {update} caused error {context.error}")
+        print(f"Erro: {e}")
+        await update.message.reply_text("❌ Erro temporário. Tente novamente.")
 
 def main():
-    """Main function"""
-    print("🚀 Starting Personal Assistant...")
+    """Função principal"""
+    print("🚀 Iniciando Assistente Pessoal...")
     
     try:
-        # Create Updater with token
-        updater = Updater(TOKEN, use_context=True)
+        app = Application.builder().token(TOKEN).build()
         
-        # Get dispatcher to register handlers
-        dp = updater.dispatcher
+        app.add_handler(CommandHandler("start", start))
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
         
-        # Add handlers
-        dp.add_handler(CommandHandler("start", start))
-        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+        print("✅ Bot iniciado com sucesso!")
+        print("🤖 Aguardando mensagens...")
         
-        # Add error handler
-        dp.add_error_handler(error_handler)
-        
-        # Start the Bot
-        print("✅ Bot starting polling...")
-        updater.start_polling()
-        
-        print("✅ Bot started successfully!")
-        print("🤖 Waiting for messages...")
-        
-        # Run the bot until you press Ctrl-C
-        updater.idle()
+        app.run_polling()
         
     except Exception as e:
-        print(f"❌ Error starting bot: {e}")
+        print(f"❌ Erro ao iniciar bot: {e}")
         import traceback
         traceback.print_exc()
 
