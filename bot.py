@@ -4,7 +4,7 @@ import sqlite3
 import datetime
 import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # ================= TOKEN VERIFICATION =================
 print("🔍 Starting environment check...")
@@ -16,7 +16,7 @@ print("📋 Available environment variables:")
 for key, value in os.environ.items():
     if 'BOT' in key or 'TOKEN' in key or 'TELEGRAM' in key:
         if key == 'BOT_TOKEN':
-            print(f"   {key}: {value[:10]}...")  # Show only first 10 chars for security
+            print(f"   {key}: {value[:10]}...")
         else:
             print(f"   {key}: {value}")
 
@@ -205,9 +205,9 @@ class PersonalAssistant:
 # Initialize assistant
 assistant = PersonalAssistant()
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: CallbackContext):
     """Handle /start command"""
-    user = update.effective_user
+    user = update.message.from_user
     message = f"""
 👋 Hello {user.first_name}! 
 
@@ -227,11 +227,11 @@ I'm your personal assistant! 🤖
 
 Try now! ✨
     """
-    await update.message.reply_text(message, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def handle_message(update: Update, context: CallbackContext):
     """Process messages"""
-    user_id = update.effective_user.id
+    user_id = update.message.from_user.id
     text = update.message.text
     
     try:
@@ -291,13 +291,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 `My shopping list`
             """
         
-        await update.message.reply_text(response, parse_mode='Markdown')
+        update.message.reply_text(response, parse_mode='Markdown')
         
     except Exception as e:
         print(f"Error: {e}")
-        await update.message.reply_text("❌ Temporary error. Try again.")
+        update.message.reply_text("❌ Temporary error. Try again.")
 
-def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def error_handler(update: Update, context: CallbackContext):
     """Handle errors"""
     print(f"Update {update} caused error {context.error}")
 
@@ -306,26 +306,31 @@ def main():
     print("🚀 Starting Personal Assistant...")
     
     try:
-        # Create Application
-        application = Application.builder().token(TOKEN).build()
+        # Create Updater with token
+        updater = Updater(TOKEN, use_context=True)
+        
+        # Get dispatcher to register handlers
+        dp = updater.dispatcher
         
         # Add handlers
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        dp.add_handler(CommandHandler("start", start))
+        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
         
         # Add error handler
-        application.add_error_handler(error_handler)
+        dp.add_error_handler(error_handler)
         
         # Start the Bot
         print("✅ Bot starting polling...")
-        application.run_polling()
+        updater.start_polling()
         
         print("✅ Bot started successfully!")
         print("🤖 Waiting for messages...")
         
+        # Run the bot until you press Ctrl-C
+        updater.idle()
+        
     except Exception as e:
         print(f"❌ Error starting bot: {e}")
-        # More detailed error information
         import traceback
         traceback.print_exc()
 
