@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ASSISTENTE PESSOAL AVANÇADO - SISTEMA DE ALTA COMPLEXIDADE
-Com capacidade interpretativa profunda de linguagem natural
+ASSISTENTE PESSOAL - VERSÃO PRÁTICA E FUNCIONAL
+Foca no que realmente importa: entender frases reais em português
 """
 
 import os
@@ -10,10 +10,8 @@ import sqlite3
 import datetime
 import re
 import sys
-from enum import Enum
-from typing import Dict, List, Tuple, Optional
 
-print("🧠 Iniciando Assistente com Inteligência Avançada...")
+print("🤖 Iniciando Assistente Prático...")
 
 BOT_TOKEN = "SEU_TOKEN_AQUI"
 
@@ -30,511 +28,233 @@ except ImportError as e:
     sys.exit(1)
 
 # =============================================
-# ENUMS E ESTRUTURAS COMPLEXAS
+# PROCESSADOR PRÁTICO - FOCO NO QUE FUNCIONA
 # =============================================
 
-class TipoIntencao(Enum):
-    AGENDAR = "agendar"
-    CONSULTAR = "consultar" 
-    LISTA_COMPRAS = "lista_compras"
-    LEMBRETE = "lembrete"
-    SAUDACAO = "saudacao"
-    AGRADECIMENTO = "agradecimento"
-    DESCONHECIDO = "desconhecido"
-
-class EntidadeTemporal:
+class ProcessadorPortugues:
     def __init__(self):
-        self.data = None
-        self.hora = None
-        self.periodo_dia = None
-        self.duracao = None
-        self.repeticao = None
-
-class EntidadeNomeada:
-    def __init__(self):
-        self.pessoas = []
-        self.locais = []
-        self.organizacoes = []
-
-class EstruturaFrase:
-    def __init__(self):
-        self.verbo_principal = None
-        self.sujeito = None
-        self.objeto = None
-        self.complementos = []
-        self.adjuntos_temporais = []
-        self.adjuntos_locais = []
-
-# =============================================
-# ANALISADOR SINTÁTICO AVANÇADO
-# =============================================
-
-class AnalisadorSintatico:
-    def __init__(self):
-        # VERBOS DE AÇÃO EXPANDIDOS
-        self.verbos_acao = {
-            'telefonar', 'ligar', 'chamar', 'discar', 'contactar',
-            'visitar', 'encontrar', 'ver', 'encontrar', 'ir ver',
-            'buscar', 'apanhar', 'pegar', 'levar', 'trazer',
-            'marcar', 'agendar', 'marcação', 'agendamento',
-            'consultar', 'visitar', 'passar no', 'ir ao', 'dirigir',
-            'reunir', 'encontrar', 'conversar', 'falar'
+        # VERBOS QUE IMPORTAM
+        self.acoes = {
+            'telefonar': 'Telefonar para',
+            'ligar': 'Telefonar para', 
+            'chamar': 'Telefonar para',
+            'visitar': 'Visitar',
+            'encontrar': 'Encontrar com',
+            'buscar': 'Buscar',
+            'levar': 'Levar',
+            'reunir': 'Reunião com'
         }
         
-        # PESSOAS COMUNS (PODE EXPANDIR)
-        self.pessoas_comuns = {
-            'pai', 'mãe', 'mãe', 'avô', 'avó', 'filho', 'filha',
-            'marido', 'esposa', 'mulher', 'namorado', 'namorada',
-            'amigo', 'amiga', 'colega', 'chefe', 'cliente', 'médico'
+        # PESSOAS COMUNS
+        self.pessoas = {
+            'pai', 'mãe', 'avô', 'avó', 'filho', 'filha',
+            'marido', 'esposa', 'mulher', 'amigo', 'amiga', 
+            'colega', 'chefe', 'cliente', 'médico', 'doutor'
         }
         
         # LOCAIS COMUNS
-        self.locais_comuns = {
+        self.locais = {
             'hospital', 'escola', 'trabalho', 'casa', 'escritório',
-            'consultório', 'supermercado', 'mercado', 'farmácia',
-            'shopping', 'centro comercial', 'aeroporto'
+            'consultório', 'supermercado', 'mercado', 'farmácia'
         }
 
-    def analisar_estrutura(self, texto: str) -> EstruturaFrase:
-        """Análise sintática profunda da frase"""
-        estrutura = EstruturaFrase()
+    def extrair_titulo_inteligente(self, texto):
+        """Extrai título de forma PRÁTICA e FUNCIONAL"""
         texto_lower = texto.lower()
         
-        # TOKENIZAÇÃO E ANÁLISE BÁSICA
-        palavras = texto_lower.split()
-        
-        # IDENTIFICAR VERBO PRINCIPAL
-        for palavra in palavras:
-            if palavra in self.verbos_acao:
-                estrutura.verbo_principal = palavra
+        # DETECTA AÇÃO PRINCIPAL
+        acao_encontrada = None
+        for acao in self.acoes:
+            if acao in texto_lower:
+                acao_encontrada = acao
                 break
         
-        # IDENTIFICAR SUJEITO (antes do verbo)
-        if estrutura.verbo_principal:
-            idx_verbo = palavras.index(estrutura.verbo_principal)
-            estrutura.sujeito = ' '.join(palavras[:idx_verbo]) if idx_verbo > 0 else "eu"
+        # DETECTA PESSOA
+        pessoa_encontrada = None
+        for pessoa in self.pessoas:
+            if pessoa in texto_lower:
+                pessoa_encontrada = pessoa
+                break
         
-        # IDENTIFICAR OBJETO (depois do verbo)
-        if estrutura.verbo_principal:
-            idx_verbo = palavras.index(estrutura.verbo_principal)
-            estrutura.objeto = ' '.join(palavras[idx_verbo + 1:])
+        # DETECTA LOCAL
+        local_encontrado = None
+        for local in self.locais:
+            if local in texto_lower:
+                local_encontrado = local
+                break
         
-        # EXTRAIR ENTIDADES NOMEADAS
-        entidades = self.extrair_entidades_nomeadas(texto_lower)
-        estrutura.complementos.extend(entidades.pessoas)
-        estrutura.complementos.extend(entidades.locais)
-        
-        # EXTRAIR ADJUNTOS TEMPORAIS
-        estrutura.adjuntos_temporais = self.extrair_referencias_temporais(texto_lower)
-        
-        # EXTRAIR ADJUNTOS LOCAIS
-        estrutura.adjuntos_locais = self.extrair_referencias_locais(texto_lower)
-        
-        return estrutura
+        # CONSTRÓI TÍTULO INTELIGENTE
+        if acao_encontrada and pessoa_encontrada and local_encontrado:
+            return f"{self.acoes[acao_encontrada]} {pessoa_encontrada} no {local_encontrado}"
+        elif acao_encontrada and pessoa_encontrada:
+            return f"{self.acoes[acao_encontrada]} {pessoa_encontrada}"
+        elif acao_encontrada and local_encontrado:
+            return f"{self.acoes[acao_encontrada]} no {local_encontrado}"
+        elif acao_encontrada:
+            return f"{self.acoes[acao_encontrada]}"
+        else:
+            return "Compromisso"
 
-    def extrair_entidades_nomeadas(self, texto: str) -> EntidadeNomeada:
-        """Extrai pessoas, locais e organizações do texto"""
-        entidades = EntidadeNomeada()
+    def extrair_data_hora_funcional(self, texto):
+        """Extrai data e hora de forma CONFIÁVEL"""
+        hoje = datetime.datetime.now()
+        data = hoje.strftime('%d/%m/%Y')
+        hora = "09:00"
         
-        # PESSOAS
-        for pessoa in self.pessoas_comuns:
-            if pessoa in texto:
-                entidades.pessoas.append(pessoa)
-        
-        # LOCAIS
-        for local in self.locais_comuns:
-            if local in texto:
-                entidades.locais.append(local)
-        
-        return entidades
-
-    def extrair_referencias_temporais(self, texto: str) -> List[str]:
-        """Extrai todas as referências temporais"""
-        temporais = []
-        
-        # PADRÕES TEMPORAIS COMPLEXOS
-        padroes = [
-            r'(\d{1,2})[h: ]?(\d{0,2})\s*(da\s+(manhã|tarde|noite))',
-            r'(\d{1,2})\s*(horas)\s*(da\s+(manhã|tarde|noite))',
-            r'(\d{1,2})[h: ]?(\d{0,2})\s*(h)',
-            r'(\d{1,2})\s*(em ponto)',
-            r'(meio-dia|meio dia)',
-            r'(meia-noite|meia noite)',
-            r'(amanhã|hoje|depois de amanhã)',
-            r'(segunda|terça|quarta|quinta|sexta|sábado|domingo)'
-        ]
-        
-        for padrao in padroes:
-            matches = re.finditer(padrao, texto, re.IGNORECASE)
-            for match in matches:
-                temporais.append(match.group())
-        
-        return temporais
-
-    def extrair_referencias_locais(self, texto: str) -> List[str]:
-        """Extrai referências locais"""
-        locais = []
-        
-        for local in self.locais_comuns:
-            if local in texto:
-                locais.append(local)
-        
-        return locais
-
-# =============================================
-# PROCESSADOR TEMPORAL AVANÇADO
-# =============================================
-
-class ProcessadorTemporal:
-    def __init__(self):
-        self.dias_semana = {
-            'segunda': 0, 'terça': 1, 'quarta': 2, 'quinta': 3,
-            'segunda-feira': 0, 'terça-feira': 1, 'quarta-feira': 2, 'quinta-feira': 3,
-            'sexta': 4, 'sábado': 5, 'domingo': 6,
-            'sexta-feira': 4
-        }
-        
-        self.periodos_dia = {
-            'manhã': (6, 12),
-            'tarde': (12, 18), 
-            'noite': (18, 24),
-            'madrugada': (0, 6)
-        }
-
-    def processar_temporalidade(self, texto: str) -> EntidadeTemporal:
-        """Processamento temporal de alta precisão"""
-        temporal = EntidadeTemporal()
         texto_lower = texto.lower()
         
-        # DATA PRIMEIRO
-        temporal.data = self.extrair_data(texto_lower)
-        
-        # HORA COM PERÍODO DO DIA
-        hora_info = self.extrair_hora_com_periodo(texto_lower)
-        temporal.hora = hora_info['hora']
-        temporal.periodo_dia = hora_info['periodo']
-        
-        return temporal
-
-    def extrair_data(self, texto: str) -> str:
-        """Extrai data com alta precisão"""
-        hoje = datetime.datetime.now()
+        # DATAS SIMPLES E FUNCIONAIS
+        if 'amanhã' in texto_lower:
+            data = (hoje + datetime.timedelta(days=1)).strftime('%d/%m/%Y')
+        elif 'hoje' in texto_lower:
+            data = hoje.strftime('%d/%m/%Y')
         
         # DIAS DA SEMANA
-        for dia, offset in self.dias_semana.items():
-            if dia in texto:
-                dias_diferenca = (offset - hoje.weekday()) % 7
-                data_alvo = hoje + datetime.datetime.timedelta(days=dias_diferenca)
-                return data_alvo.strftime('%d/%m/%Y')
-        
-        # EXPRESSÕES TEMPORAIS
-        if 'amanhã' in texto:
-            return (hoje + datetime.timedelta(days=1)).strftime('%d/%m/%Y')
-        elif 'depois de amanhã' in texto:
-            return (hoje + datetime.timedelta(days=2)).strftime('%d/%m/%Y')
-        elif 'hoje' in texto:
-            return hoje.strftime('%d/%m/%Y')
-        
-        # PADRÃO DD/MM ou DD-MM
-        padrao_data = r'(\d{1,2})[/-](\d{1,2})'
-        match = re.search(padrao_data, texto)
-        if match:
-            dia, mes = match.groups()
-            ano = hoje.year
-            return f"{int(dia):02d}/{int(mes):02d}/{ano}"
-        
-        return hoje.strftime('%d/%m/%Y')
-
-    def extrair_hora_com_periodo(self, texto: str) -> Dict:
-        """Extrai hora considerando período do dia - CORREÇÃO CRÍTICA"""
-        # PADRÃO: "2:00 da tarde" ou "2 da tarde" ou "14h" ou "14:00"
-        padrao_completo = r'(\d{1,2})[h: ]?(\d{0,2})?\s*(?:horas?)?\s*(?:da\s+)?(manhã|tarde|noite|madrugada)?'
-        matches = re.finditer(padrao_completo, texto, re.IGNORECASE)
-        
-        for match in matches:
-            hora_str, minuto_str, periodo = match.groups()
-            
-            if hora_str:
-                hora = int(hora_str)
-                minutos = int(minuto_str) if minuto_str and minuto_str.isdigit() else 0
-                
-                # CORREÇÃO DO BUG: Converter para formato 24h baseado no período
-                if periodo:
-                    if periodo.lower() in ['tarde', 'noite'] and hora < 12:
-                        hora += 12
-                    elif periodo.lower() == 'madrugada' and hora > 12:
-                        hora -= 12
-                
-                # Garantir que hora está no range correto
-                hora = hora % 24
-                
-                return {
-                    'hora': f"{hora:02d}:{minutos:02d}",
-                    'periodo': periodo
-                }
-        
-        # SE NÃO ENCONTROU, TENTA PADRÕES SIMPLES
-        padrao_simples = r'(\d{1,2})[h: ]?(\d{0,2})'
-        match = re.search(padrao_simples, texto)
-        if match:
-            hora_str, minuto_str = match.groups()
-            hora = int(hora_str) % 24
-            minutos = int(minuto_str) if minuto_str and minuto_str.isdigit() else 0
-            return {
-                'hora': f"{hora:02d}:{minutos:02d}",
-                'periodo': None
-            }
-        
-        # PADRÃO DE TEXTO
-        if 'meio-dia' in texto or 'meio dia' in texto:
-            return {'hora': '12:00', 'periodo': 'tarde'}
-        elif 'meia-noite' in texto or 'meia noite' in texto:
-            return {'hora': '00:00', 'periodo': 'madrugada'}
-        
-        return {'hora': '09:00', 'periodo': None}
-
-# =============================================
-# CLASSIFICADOR DE INTENÇÕES AVANÇADO
-# =============================================
-
-class ClassificadorIntencoes:
-    def __init__(self):
-        self.padroes_intencao = {
-            TipoIntencao.AGENDAR: [
-                r'\b(telefonar|ligar|visitar|encontrar|buscar|marcar|agendar|ir\s+ao|ir\s+ver)\b',
-                r'\b(reunião|consulta|compromisso|encontro)\b'
-            ],
-            TipoIntencao.LISTA_COMPRAS: [
-                r'\b(comprar|preciso de|acabou|faltam|lista)\b',
-                r'\b(leite|pão|arroz|feijão|supermercado|mercado)\b'
-            ],
-            TipoIntencao.CONSULTAR: [
-                r'\b(que tenho|minha agenda|ver agenda|o que falta|consultar)\b'
-            ],
-            TipoIntencao.SAUDACAO: [
-                r'\b(olá|oi|ola|bom dia|boa tarde|boa noite)\b'
-            ]
+        dias = {
+            'segunda': 0, 'terça': 1, 'quarta': 2, 'quinta': 3,
+            'sexta': 4, 'sábado': 5, 'domingo': 6
         }
+        for dia, offset in dias.items():
+            if dia in texto_lower:
+                dias_diferenca = (offset - hoje.weekday()) % 7
+                data_alvo = hoje + datetime.timedelta(days=dias_diferenca)
+                data = data_alvo.strftime('%d/%m/%Y')
+                break
+        
+        # HORAS - MÉTODO DIRETO E FUNCIONAL
+        hora_encontrada = self._extrair_hora_direto(texto_lower)
+        if hora_encontrada:
+            hora = hora_encontrada
+        
+        return data, hora
 
-    def classificar(self, texto: str) -> TipoIntencao:
-        """Classifica a intenção principal do usuário"""
+    def _extrair_hora_direto(self, texto):
+        """Extrai hora de forma DIRETA e CONFIÁVEL"""
+        
+        # PADRÃO 1: "2:00 da tarde" -> 14:00
+        padrao1 = r'(\d{1,2})[:h]?(\d{0,2})?\s*(?:da\s+)?(tarde|noite)'
+        match1 = re.search(padrao1, texto)
+        if match1:
+            hora_str, minuto_str, periodo = match1.groups()
+            hora = int(hora_str)
+            minutos = int(minuto_str) if minuto_str and minuto_str.isdigit() else 0
+            
+            if periodo in ['tarde', 'noite'] and hora < 12:
+                hora += 12
+            
+            return f"{hora:02d}:{minutos:02d}"
+        
+        # PADRÃO 2: "11h30" -> 11:30
+        padrao2 = r'(\d{1,2})[h: ]?(\d{2})'
+        match2 = re.search(padrao2, texto)
+        if match2:
+            hora_str, minuto_str = match2.groups()
+            return f"{int(hora_str):02d}:{minuto_str}"
+        
+        # PADRÃO 3: "14h" -> 14:00
+        padrao3 = r'(\d{1,2})\s*h\s*'
+        match3 = re.search(padrao3, texto)
+        if match3:
+            hora_str = match3.group(1)
+            return f"{int(hora_str):02d}:00"
+        
+        # PADRÃO 4: "2 da tarde" -> 14:00
+        padrao4 = r'(\d{1,2})\s+(?:horas?\s+)?da\s+(tarde|noite)'
+        match4 = re.search(padrao4, texto)
+        if match4:
+            hora_str, periodo = match4.groups()
+            hora = int(hora_str)
+            if periodo in ['tarde', 'noite'] and hora < 12:
+                hora += 12
+            return f"{hora:02d}:00"
+        
+        return None
+
+    def detectar_intencao(self, texto):
+        """Detecta intenção de forma PRÁTICA"""
         texto_lower = texto.lower()
         
-        for intencao, padroes in self.padroes_intencao.items():
-            for padrao in padroes:
-                if re.search(padrao, texto_lower, re.IGNORECASE):
-                    return intencao
-        
-        return TipoIntencao.DESCONHECIDO
-
-# =============================================
-# GERADOR DE RESPOSTAS CONTEXTUAIS
-# =============================================
-
-class GeradorRespostas:
-    def __init__(self):
-        self.analisador = AnalisadorSintatico()
-        self.processador_temporal = ProcessadorTemporal()
-        self.classificador = ClassificadorIntencoes()
-
-    def gerar_resposta_agendamento(self, texto: str, estrutura: EstruturaFrase, temporal: EntidadeTemporal) -> str:
-        """Gera resposta contextual para agendamento"""
-        
-        # TÍTULO INTELIGENTE BASEADO NA ANÁLISE
-        if estrutura.verbo_principal == 'telefonar' or estrutura.verbo_principal == 'ligar':
-            pessoa = next((p for p in estrutura.complementos if p in estrutura.analisador.pessoas_comuns), "contato")
-            titulo = f"Telefonar para {pessoa}"
-        
-        elif estrutura.verbo_principal == 'visitar':
-            local = next((l for l in estrutura.complementos if l in estrutura.analisador.locais_comuns), "local")
-            pessoa = next((p for p in estrutura.complementos if p in estrutura.analisador.pessoas_comuns), None)
-            if pessoa:
-                titulo = f"Visitar {pessoa} no {local}"
-            else:
-                titulo = f"Visitar {local}"
-        
-        elif estrutura.verbo_principal:
-            titulo = f"{estrutura.verbo_principal.title()} {estrutura.objeto or ''}"
+        if any(palavra in texto_lower for palavra in ['telefonar', 'ligar', 'visitar', 'buscar', 'encontrar', 'reunião']):
+            return 'agendar'
+        elif any(palavra in texto_lower for palavra in ['comprar', 'leite', 'pão', 'lista']):
+            return 'compras'
+        elif any(palavra in texto_lower for palavra in ['agenda', 'que tenho', 'ver']):
+            return 'consultar'
         else:
-            titulo = "Compromisso"
-        
-        # CONFIRMAÇÃO DETALHADA
-        confirmacao = f"""✅ **COMPROMISSO AGENDADO COM SUCESSO!**
-
-📅 **{titulo}**
-🗓️ **Data:** {temporal.data}
-⏰ **Hora:** {temporal.hora}"""
-
-        # DETALHES CONTEXTUAIS
-        if estrutura.complementos:
-            confirmacao += f"\n👥 **Envolvidos:** {', '.join(estrutura.complementos)}"
-        
-        if estrutura.adjuntos_locais:
-            confirmacao += f"\n📍 **Local:** {', '.join(estrutura.adjuntos_locais)}"
-        
-        confirmacao += "\n\n💡 _Você receberá um lembrete 15 minutos antes._"
-        
-        return confirmacao
+            return 'outro'
 
 # =============================================
-# SISTEMA PRINCIPAL
+# BANCO DE DADOS SIMPLES
 # =============================================
 
-class AssistenteAvancado:
+class BancoSimples:
     def __init__(self):
-        self.db = sqlite3.connect('assistente_avancado.db', check_same_thread=False)
-        self.criar_banco()
-        self.analisador = AnalisadorSintatico()
-        self.processador_temporal = ProcessadorTemporal()
-        self.classificador = ClassificadorIntencoes()
-        self.gerador_respostas = GeradorRespostas()
-        print("✅ Sistema de IA carregado")
-
-    def criar_banco(self):
-        cursor = self.db.cursor()
+        self.conn = sqlite3.connect('assistente_simples.db', check_same_thread=False)
+        self.criar_tabelas()
+    
+    def criar_tabelas(self):
+        cursor = self.conn.cursor()
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS compromissos_avancados (
+            CREATE TABLE IF NOT EXISTS compromissos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
                 titulo TEXT,
                 data TEXT,
                 hora TEXT,
-                pessoas TEXT,
-                locais TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        self.db.commit()
-
-    def processar_mensagem(self, texto: str, user_id: int) -> str:
-        """Processamento principal com IA avançada"""
-        
-        # ANÁLISE PROFUNDA
-        estrutura = self.analisador.analisar_estrutura(texto)
-        temporal = self.processador_temporal.processar_temporalidade(texto)
-        intencao = self.classificador.classificar(texto)
-        
-        print(f"🔍 ANÁLISE:")
-        print(f"   Verbo: {estrutura.verbo_principal}")
-        print(f"   Sujeito: {estrutura.sujeito}")
-        print(f"   Objeto: {estrutura.objeto}")
-        print(f"   Complementos: {estrutura.complementos}")
-        print(f"   Temporais: {estrutura.adjuntos_temporais}")
-        print(f"   Locais: {estrutura.adjuntos_locais}")
-        print(f"   Data: {temporal.data}")
-        print(f"   Hora: {temporal.hora}")
-        print(f"   Intenção: {intencao}")
-        
-        # AÇÃO BASEADA NA INTENÇÃO
-        if intencao == TipoIntencao.AGENDAR:
-            return self.processar_agendamento(texto, estrutura, temporal, user_id)
-        elif intencao == TipoIntencao.CONSULTAR:
-            return self.processar_consulta(user_id)
-        else:
-            return self.gerar_resposta_geral(intencao, texto)
-
-    def processar_agendamento(self, texto: str, estrutura: EstruturaFrase, temporal: EntidadeTemporal, user_id: int) -> str:
-        """Processa agendamento com inteligência contextual"""
-        
-        # GERAR TÍTULO INTELIGENTE
-        titulo = self.gerar_titulo_contextual(estrutura)
-        
-        # SALVAR NO BANCO
-        cursor = self.db.cursor()
-        cursor.execute(
-            "INSERT INTO compromissos_avancados (user_id, titulo, data, hora, pessoas, locais) VALUES (?, ?, ?, ?, ?, ?)",
-            (user_id, titulo, temporal.data, temporal.hora, 
-             ','.join(estrutura.complementos), ','.join(estrutura.adjuntos_locais))
-        )
-        self.db.commit()
-        
-        # GERAR RESPOSTA
-        return self.gerador_respostas.gerar_resposta_agendamento(texto, estrutura, temporal)
-
-    def gerar_titulo_contextual(self, estrutura: EstruturaFrase) -> str:
-        """Gera título inteligente baseado no contexto"""
-        
-        if estrutura.verbo_principal == 'telefonar':
-            pessoa = next((p for p in estrutura.complementos), "contato")
-            return f"Telefonar para {pessoa}"
-        
-        elif estrutura.verbo_principal == 'visitar':
-            local = next((l for l in estrutura.complementos if l in self.analisador.locais_comuns), None)
-            pessoa = next((p for p in estrutura.complementos if p in self.analisador.pessoas_comuns), None)
-            
-            if pessoa and local:
-                return f"Visitar {pessoa} no {local}"
-            elif local:
-                return f"Visitar {local}"
-            elif pessoa:
-                return f"Visitar {pessoa}"
-            else:
-                return "Visita"
-        
-        elif estrutura.verbo_principal:
-            acao = estrutura.verbo_principal.title()
-            objeto = estrutura.objeto or ""
-            return f"{acao} {objeto}".strip()
-        
-        return "Compromisso"
-
-    def processar_consulta(self, user_id: int) -> str:
-        """Processa consulta à agenda"""
-        cursor = self.db.cursor()
-        cursor.execute(
-            "SELECT titulo, data, hora FROM compromissos_avancados WHERE user_id = ? ORDER BY data, hora",
-            (user_id,)
-        )
-        compromissos = cursor.fetchall()
-        
-        if not compromissos:
-            return "📅 *Sua agenda está vazia.*"
-        
-        resposta = "📅 **SUA AGENDA AVANÇADA**\n\n"
-        for titulo, data, hora in compromissos:
-            resposta += f"• **{titulo}**\n  📅 {data} ⏰ {hora}\n\n"
-        
-        return resposta
-
-    def gerar_resposta_geral(self, intencao: TipoIntencao, texto: str) -> str:
-        """Resposta para intenções não relacionadas a agendamento"""
-        if intencao == TipoIntencao.SAUDACAO:
-            return "👋 Olá! Sou seu assistente inteligente. Posso ajudar com agendamentos complexos como 'Visitar o pai no hospital às 2 da tarde'!"
-        else:
-            return """🤖 **Assistente Inteligente**
-
-💡 **Exemplos que entendo:**
-• `Telefonar ao meu pai às 10h30`
-• `Visitar o médico no hospital às 2 da tarde` 
-• `Buscar filhos na escola amanhã 17h`
-• `Reunião com cliente sexta 14h`
-
-🎯 **Fale naturalmente que eu entendo!**"""
+        self.conn.commit()
+        print("✅ Banco pronto")
+    
+    def salvar_compromisso(self, user_id, titulo, data, hora):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "INSERT INTO compromissos (user_id, titulo, data, hora) VALUES (?, ?, ?, ?)",
+                (user_id, titulo, data, hora)
+            )
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"Erro ao salvar: {e}")
+            return False
+    
+    def buscar_compromissos(self, user_id):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "SELECT titulo, data, hora FROM compromissos WHERE user_id = ? ORDER BY data, hora",
+                (user_id,)
+            )
+            return cursor.fetchall()
+        except Exception:
+            return []
 
 # =============================================
-# HANDLERS DO BOT
+# ASSISTENTE PRINCIPAL - SIMPLES E EFETIVO
 # =============================================
 
-assistente = AssistenteAvancado()
+db = BancoSimples()
+processador = ProcessadorPortugues()
 
 def start(update: Update, context: CallbackContext):
     user = update.message.from_user
     
     mensagem = f"""
-🧠 **Olá {user.first_name}!**
+👋 **Olá {user.first_name}!**
 
-Sou seu **Assistente Pessoal com IA Avançada**! 
+Sou seu **Assistente Pessoal Prático**! 🤖
 
-🎯 **AGORA ENTENDO LINGUAGEM NATURAL COMPLEXA:**
+🎯 **AGORA ENTENDO FRASES REAIS:**
 
 • `"Visitar o meu pai no hospital às 2:00 da tarde"` ✅
-• `"Telefonar à mãe amanhã 10h30"` ✅  
+• `"Telefonar à minha mãe amanhã 11h30"` ✅
 • `"Buscar filhos na escola sexta 17h"` ✅
-• `"Reunião com cliente no escritório segunda 9h"` ✅
 
-💡 **Fale exatamente como falaria com uma pessoa!**
+💡 **Fale naturalmente - eu entendo!**
 
-**Experimente uma frase complexa agora!** 🚀
+**Experimente agora com uma das frases acima!** 🚀
     """
     
     update.message.reply_text(mensagem, parse_mode='Markdown')
@@ -543,21 +263,61 @@ def handle_message(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     texto = update.message.text
     
-    print(f"🧠 Processando: '{texto}'")
+    print(f"📨 Processando: '{texto}'")
     
     try:
-        resposta = assistente.processar_mensagem(texto, user_id)
+        # DETECTA O QUE O USUÁRIO QUER
+        intencao = processador.detectar_intencao(texto)
+        
+        if intencao == 'agendar':
+            # PROCESSAMENTO INTELIGENTE
+            titulo = processador.extrair_titulo_inteligente(texto)
+            data, hora = processador.extrair_data_hora_funcional(texto)
+            
+            print(f"📅 Titulo: {titulo}")
+            print(f"📅 Data: {data}, Hora: {hora}")
+            
+            if db.salvar_compromisso(user_id, titulo, data, hora):
+                resposta = f"""✅ **AGENDADO COM SUCESSO!**
+
+📝 **{titulo}**
+🗓️ **Data:** {data}
+⏰ **Hora:** {hora}
+
+💡 _Use 'Minha agenda' para ver todos_"""
+            else:
+                resposta = "❌ Erro ao agendar. Tente novamente."
+        
+        elif intencao == 'consultar':
+            compromissos = db.buscar_compromissos(user_id)
+            if compromissos:
+                resposta = "📅 **SUA AGENDA**\n\n"
+                for titulo, data, hora in compromissos:
+                    resposta += f"• **{titulo}**\n  📅 {data} ⏰ {hora}\n\n"
+            else:
+                resposta = "📅 *Sua agenda está vazia*"
+        
+        else:
+            resposta = """🤖 **Como posso ajudar?**
+
+💡 **Exemplos que funcionam:**
+• `Visitar o meu pai no hospital às 2:00 da tarde`
+• `Telefonar à minha mãe amanhã 11h30`
+• `Buscar filhos na escola sexta 17h`
+
+🎯 **Fale naturalmente!**"""
+        
         update.message.reply_text(resposta, parse_mode='Markdown')
         
     except Exception as e:
-        print(f"❌ Erro no processamento: {e}")
+        print(f"❌ Erro: {e}")
         update.message.reply_text(
-            "❌ **Erro no processamento.** Tente reformular a frase.",
+            "❌ **Erro de processamento.** Tente reformular.",
             parse_mode='Markdown'
         )
 
 def main():
-    print("🧠 Iniciando Sistema de IA Avançada...")
+    print("🚀 Iniciando Assistente Prático...")
     
     try:
         updater = Updater(BOT_TOKEN, use_context=True)
@@ -568,9 +328,10 @@ def main():
         
         updater.start_polling()
         
-        print("✅ Sistema de IA ativo!")
-        print("🧠 Aguardando frases complexas...")
-        print("💡 Teste: 'Visitar o meu pai no hospital às 2:00 da tarde'")
+        print("✅ Bot prático ativo!")
+        print("🤖 Teste estas frases:")
+        print("   • 'Visitar o meu pai no hospital às 2:00 da tarde'")
+        print("   • 'Telefonar à minha mãe amanhã 11h30'")
         
         updater.idle()
         
